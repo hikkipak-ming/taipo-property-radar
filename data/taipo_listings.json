@@ -1,0 +1,22 @@
+{
+  "district": "大埔區",
+  "interval_hours": 12,
+  "updated_at": "2026-11-19 14:54 HKT",
+  "next_scheduled_at": "2026-11-20 02:54 HKT",
+  "stats": {
+    "raw_total": 0,
+    "merged_units": 0,
+    "cross_platform_matches": 0,
+    "below_market_bargains": 0,
+    "tx_samples_count": 0,
+    "new_in_12h": 0,
+    "price_drops_in_12h": 0,
+    "sources": {
+      "28Hse": 0,
+      "中原地產": 0,
+      "美聯物業": 0
+    }
+  },
+  "estate_benchmarks": {},
+  "listings": []
+}
