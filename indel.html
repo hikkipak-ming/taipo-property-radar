@@ -1,1 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>大埔區全網地產聚合篩選器 · 成交均價折讓雷達</title>
+  <style>
+    :root {
+      --bg-page: #f4f6f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #0f766e;
+      --primary-soft: #ccfbf1;
+      --green: #15803d;
+      --green-bg: #dcfce7;
+      --amber: #b45309;
+      --amber-bg: #fef3c7;
+      --red: #b91c1c;
+      --red-bg: #fee2e2;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang HK", "Microsoft JhengHei", sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+    header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 { font-size: 1.22rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-cycle {
+      font-size: 0.75rem;
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .meta-bar { font-size: 0.83rem; color: var(--text-muted); margin-top: 4px; }
+    button {
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+    button:hover { background: var(--bg-subtle); }
 
+    .container { max-width: 1320px; margin: 20px auto; padding: 0 24px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      box-shadow: var(--shadow);
+    }
+    .stat-card.highlight { border-left: 4px solid var(--green); }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); }
+    .stat-val { font-size: 1.3rem; font-weight: 700; margin-top: 2px; }
+
+    .filter-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    .field label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .field select, .field input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      background: #fff;
+    }
+    .check-group { display: flex; flex-direction: column; gap: 6px; font-size: 0.83rem; font-weight: 600; }
+    .check-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+    .table-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: var(--shadow);
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th {
+      background: var(--bg-subtle);
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td { padding: 14px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.9rem; }
+    tr:hover td { background: #fafcfd; }
+
+    .unit-cell { display: flex; gap: 12px; align-items: flex-start; min-width: 245px; }
+    .thumb {
+      width: 74px; height: 56px; border-radius: 6px; object-fit: cover;
+      background: #e2e8f0; flex-shrink: 0; display: flex; align-items: center;
+      justify-content: center; font-size: 0.72rem; color: var(--text-muted);
+    }
+    .estate-title { font-weight: 700; font-size: 0.96rem; }
+    .tag-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+    .sub-tag {
+      font-size: 0.72rem; background: var(--primary-soft); color: var(--primary);
+      padding: 1px 6px; border-radius: 4px; font-weight: 600;
+    }
+    .new-tag {
+      font-size: 0.72rem; background: #dbeafe; color: #1d4ed8;
+      padding: 1px 6px; border-radius: 4px; font-weight: 700;
+    }
+    .drop-tag {
+      font-size: 0.72rem; background: var(--red-bg); color: var(--red);
+      padding: 1px 6px; border-radius: 4px; font-weight: 700;
+    }
+
+    /* 成交均價對比欄 */
+    .market-box { min-width: 175px; }
+    .bargain-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .bargain-pill.cheaper { background: var(--green-bg); color: var(--green); border: 1px solid #86efac; }
+    .bargain-pill.expensive { background: #f1f5f9; color: #475569; }
+    .bargain-pill.overpriced { background: var(--red-bg); color: var(--red); }
+    .tx-ref { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+
+    .offer-list { display: flex; flex-direction: column; gap: 6px; min-width: 260px; }
+    .offer-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 9px; border-radius: 6px; border: 1px solid var(--border);
+      text-decoration: none; color: inherit; font-size: 0.84rem;
+    }
+    .offer-item:hover { border-color: var(--primary); background: var(--bg-subtle); }
+    .offer-item.cheapest { background: var(--green-bg); border-color: #86efac; font-weight: 700; }
+
+    .spread-badge {
+      display: inline-block; background: var(--amber-bg); color: var(--amber);
+      font-size: 0.76rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px;
+    }
+    .track-badge {
+      display: inline-block; font-size: 0.75rem; padding: 2px 7px; border-radius: 4px;
+      background: #e0e7ff; color: #3730a3; font-weight: 600;
+    }
+    .empty-box { padding: 48px 20px; text-align: center; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <h1>大埔區全網地產聚合篩選器 <span class="badge-cycle">每 12 小時自動抓取（09:00 / 21:00 HKT）</span></h1>
+      <div class="meta-bar" id="lastUpdated">正在讀取大埔區最新放盤與成交均價...</div>
+    </div>
+    <div>
+      <button onclick="loadData()">🔄 刷新最新數據</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">大埔區原始廣告總數</div>
+      <div class="stat-val" id="statRaw">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">合併後獨立單位 / 跨網重疊</div>
+      <div class="stat-val" id="statMerged">-</div>
+    </div>
+    <div class="stat-card highlight">
+      <div class="stat-label">低於屋苑成交均價（筍盤）</div>
+      <div class="stat-val" style="color:var(--green);" id="statBargains">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">過去 12 小時新上盤 / 減價</div>
+      <div class="stat-val" id="statDelta">-</div>
+    </div>
+  </div>
+
+  <div class="filter-panel">
+    <div class="field">
+      <label>大埔分區</label>
+      <select id="fSubDistrict" onchange="render()">
+        <option value="">全部大埔區</option>
+        <option value="大埔市中心">大埔市中心（大埔中心/昌運/新達）</option>
+        <option value="太和">太和（太湖花園/寶雅苑/太和邨）</option>
+        <option value="白石角">白石角（天賦海灣/逸瓏灣/嘉熙/海日灣）</option>
+        <option value="大埔半山 / 康樂園">大埔半山 / 康樂園（嵐山/上然/比華利山）</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>屋苑關鍵字</label>
+      <input type="text" id="fKeyword" placeholder="例如：大埔中心、天賦海灣" oninput="render()" />
+    </div>
+    <div class="field">
+      <label>最高叫價（萬）</label>
+      <input type="number" id="fMaxPrice" placeholder="例如：650" oninput="render()" />
+    </div>
+    <div class="field">
+      <label>最低實呎</label>
+      <input type="number" id="fMinArea" placeholder="例如：350" oninput="render()" />
+    </div>
+    <div class="field">
+      <label>最低低於成交均價幅度</label>
+      <select id="fMinDiscount" onchange="render()">
+        <option value="">不限（顯示全部）</option>
+        <option value="0">低於成交均價（平過市價即可）</option>
+        <option value="3">至少平過成交均價 3% 以上</option>
+        <option value="5">至少平過成交均價 5% 以上</option>
+        <option value="10">至少平過成交均價 10% 以上（超筍盤）</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>排序方式</label>
+      <select id="fSort" onchange="render()">
+        <option value="bargain">低於成交均價幅度（最平市價優先）</option>
+        <option value="spread">跨網價差（由大至小）</option>
+        <option value="price_asc">最低叫價（由平至貴）</option>
+        <option value="unit_asc">最低呎價（由平至貴）</option>
+      </select>
+    </div>
+    <div class="check-group">
+      <label><input type="checkbox" id="fOnlyMulti" onchange="render()" /> 只看跨網重疊比價盤</label>
+      <label><input type="checkbox" id="fOnlyDelta" onchange="render()" /> 只看 12 小時內新盤 / 減價</label>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>屋苑及單位規格</th>
+          <th>實呎 / 間隔</th>
+          <th>各平台實時叫價（點擊跳轉原網）</th>
+          <th>屋苑近期成交均價對比</th>
+          <th>跨網價差與雙軌認盤依據</th>
+        </tr>
+      </thead>
+      <tbody id="listingBody">
+        <tr><td colspan="5" class="empty-box">正在載入大埔區放盤與成交均價數據...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let ALL_LISTINGS = [];
+
+  async function loadData() {
+    try {
+      const res = await fetch(`./data/taipo_listings.json?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("尚未產生 taipo_listings.json");
+      const data = await res.json();
+
+      ALL_LISTINGS = data.listings || [];
+      const src = data.stats?.sources || {};
+      document.getElementById("lastUpdated").textContent =
+        `上次抓取：${data.updated_at} ｜ 下次更新：${data.next_scheduled_at || "12小時後"}（28Hse: ${src["28Hse"] ?? 0} · 中原: ${src["中原地產"] ?? 0} · 美聯: ${src["美聯物業"] ?? 0} · 參考成交樣本: ${data.stats?.tx_samples_count ?? 0} 宗）`;
+
+      document.getElementById("statRaw").textContent = data.stats?.raw_total ?? 0;
+      document.getElementById("statMerged").textContent =
+        `${data.stats?.merged_units ?? 0} 盤 / ${data.stats?.cross_platform_matches ?? 0} 重疊`;
+      document.getElementById("statBargains").textContent = `${data.stats?.below_market_bargains ?? 0} 盤`;
+      document.getElementById("statDelta").textContent =
+        `${data.stats?.new_in_12h ?? 0} 新 / ${data.stats?.price_drops_in_12h ?? 0} 減`;
+
+      render();
+    } catch (err) {
+      document.getElementById("listingBody").innerHTML = `
+        <tr><td colspan="5" class="empty-box">
+          <strong>尚未偵測到 <code>data/taipo_listings.json</code></strong><br><br>
+          上傳更新後嘅腳本至 GitHub 後，請到 <b>Actions → Scrape Tai Po Property Listings (12H) → Run workflow</b> 執行一次，網頁便會顯示最新成交均價折讓計算。
+        </td></tr>`;
+    }
+  }
+
+  function render() {
+    const subDist = document.getElementById("fSubDistrict").value;
+    const kw = document.getElementById("fKeyword").value.trim().toLowerCase();
+    const maxPrice = parseFloat(document.getElementById("fMaxPrice").value);
+    const minArea = parseInt(document.getElementById("fMinArea").value, 10);
+    const minDiscountStr = document.getElementById("fMinDiscount").value;
+    const onlyMulti = document.getElementById("fOnlyMulti").checked;
+    const onlyDelta = document.getElementById("fOnlyDelta").checked;
+    const sortBy = document.getElementById("fSort").value;
+
+    let filtered = ALL_LISTINGS.filter(item => {
+      if (subDist && item.sub_district !== subDist) return false;
+      if (kw && !`${item.estate} ${item.block}`.toLowerCase().includes(kw)) return false;
+      if (!isNaN(maxPrice) && item.min_price > maxPrice) return false;
+      if (!isNaN(minArea) && item.area < minArea) return false;
+      if (onlyMulti && item.offers.length < 2) return false;
+      if (onlyDelta && !item.is_new_12h && !(item.price_change_wan < 0)) return false;
+
+      if (minDiscountStr !== "") {
+        const minDisc = parseFloat(minDiscountStr);
+        // vs_market_pct 為負數代表平過成交均價（例如 -5.2 代表平 5.2%）
+        if (item.vs_market_pct === null || item.vs_market_pct === undefined) return false;
+        if (minDisc === 0 && item.vs_market_pct >= 0) return false;
+        if (minDisc > 0 && item.vs_market_pct > -minDisc) return false;
+      }
+      return true;
+    });
+
+    filtered.sort((a, b) => {
+      if (sortBy === "bargain") {
+        const va = a.vs_market_pct !== null && a.vs_market_pct !== undefined ? a.vs_market_pct : 999;
+        const vb = b.vs_market_pct !== null && b.vs_market_pct !== undefined ? b.vs_market_pct : 999;
+        return va - vb;
+      }
+      if (sortBy === "spread") return (b.spread_wan - a.spread_wan) || (b.offers.length - a.offers.length);
+      if (sortBy === "price_asc") return a.min_price - b.min_price;
+      if (sortBy === "unit_asc") return a.min_unit_price - b.min_unit_price;
+      return 0;
+    });
+
+    const tbody = document.getElementById("listingBody");
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-box">沒有符合目前篩選條件的大埔區放盤。</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(u => {
+      const thumbHtml = u.cover_image
+        ? `<img class="thumb" src="${u.cover_image}" alt="${u.estate}" loading="lazy" />`
+        : `<div class="thumb">無相盤</div>`;
+
+      const deltaTag = u.is_new_12h
+        ? `<span class="new-tag">🆕 12h新盤</span>`
+        : (u.price_change_wan < 0 ? `<span class="drop-tag">📉 減 ${Math.abs(u.price_change_wan)}萬</span>` : "");
+
+      const offersHtml = u.offers.map((o, idx) => `
+        <a class="offer-item ${idx === 0 && u.offers.length > 1 ? "cheapest" : ""}" href="${o.url}" target="_blank" rel="noopener">
+          <span>${o.platform} ${o.has_photo ? "📷" : "📝"}</span>
+          <span><strong>$${o.price_wan}萬</strong> (@$${o.unit_price.toLocaleString()}) ↗</span>
+        </a>
+      `).join("");
+
+      // 渲染屋苑近期成交均價對比
+      let marketHtml = `<span style="color:var(--text-muted);font-size:0.8rem;">暫無近期成交參考</span>`;
+      if (u.estate_avg_unit_price && u.vs_market_pct !== null && u.vs_market_pct !== undefined) {
+        const pct = u.vs_market_pct;
+        const scopeLabel = u.benchmark_scope === "estate"
+          ? `${u.estate}近期成交均價`
+          : `${u.sub_district}近期成交均價`;
+
+        let pillHtml = "";
+        if (pct < 0) {
+          pillHtml = `<div class="bargain-pill cheaper">🔥 平過成交均價 ${Math.abs(pct).toFixed(1)}%</div>`;
+        } else if (pct <= 5) {
+          pillHtml = `<div class="bargain-pill expensive">貼近成交均價 (+${pct.toFixed(1)}%)</div>`;
+        } else {
+          pillHtml = `<div class="bargain-pill overpriced">高於成交均價 +${pct.toFixed(1)}%</div>`;
+        }
+
+        marketHtml = `
+          <div class="market-box">
+            ${pillHtml}
+            <div class="tx-ref">
+              ${scopeLabel}：<strong>@$${u.estate_avg_unit_price.toLocaleString()}/呎</strong><br>
+              （基於近 ${u.estate_tx_count} 宗成交計算）
+            </div>
+          </div>
+        `;
+      }
+
+      const spreadHtml = u.spread_wan > 0
+        ? `<div class="spread-badge">跨網差價 $${u.spread_wan} 萬</div><br>`
+        : (u.offers.length > 1 ? `<div class="spread-badge" style="background:#e2e8f0;color:#334155;">各網同價</div><br>` : "");
+
+      const trackLabel = u.match_track === "photo"
+        ? "🖼️ 圖片指紋吻合"
+        : (u.match_track === "text_price" ? "📝 文字+同價吻合" : "單一平台放盤");
+
+      return `
+        <tr>
+          <td>
+            <div class="unit-cell">
+              ${thumbHtml}
+              <div>
+                <div class="estate-title">${u.estate} ${u.block} ${u.floor}</div>
+                <div class="tag-row">
+                  <span class="sub-tag">${u.sub_district}</span>
+                  ${deltaTag}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td><strong>${u.area} 呎</strong><br><span style="color:var(--text-muted);font-size:0.82rem;">${u.rooms}</span></td>
+          <td><div class="offer-list">${offersHtml}</div></td>
+          <td>${marketHtml}</td>
+          <td>
+            ${spreadHtml}
+            <span class="track-badge">${trackLabel}</span>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${u.match_reason}</div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  loadData();
+</script>
+</body>
+</html>
