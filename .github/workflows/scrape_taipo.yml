@@ -1,0 +1,37 @@
+name: Scrape Tai Po Property Listings (12H)
+
+on:
+  schedule:
+    - cron: '0 1,13 * * *'   # 每12小時執行一次（香港時間 09:00 及 21:00）
+  workflow_dispatch:         # 支援在 GitHub 後台或網頁手動即時觸發
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-taipo-12h:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run 12H Tai Po Scraper & Dual-Track Matcher
+        run: python scraper/taipo_scraper.py
+
+      - name: Commit & Push updated JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/taipo_listings.json
+          git diff --staged --quiet || git commit -m "chore(data): 12h Tai Po listings update [skip ci]"
+          git push
