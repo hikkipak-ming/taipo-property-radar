@@ -1,8 +1,8 @@
 {
   "district": "大埔區",
   "interval_hours": 12,
-  "updated_at": "2026-11-22 10:00 HKT",
-  "next_scheduled_at": "2026-11-22 22:00 HKT",
+  "updated_at": "2026-11-22 21:52 HKT",
+  "next_scheduled_at": "2026-11-23 09:52 HKT",
   "stats": {
     "raw_total": 0,
     "merged_units": 0,
